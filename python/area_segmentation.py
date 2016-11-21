@@ -85,8 +85,10 @@ def get_center_pos(im, pos, size):
                 min_y = min(min_y, y)
                 max_x = max(max_x, x)
                 max_y = max(max_y, y)
-    r_x = int(((max_x - min_x) / 2) + (b_x * width))
-    r_y = int(((max_y - min_y) / 2) + (b_y * height))
+    r_x = int((abs(max_x - min_x) / 2) + (b_x * width))
+    r_y = int((abs(max_y - min_y) / 2) + (b_y * height))
+    if pos == (7, 4):
+        print(max_x, min_x, max_y, min_y)
     return r_x, r_y
 
 
