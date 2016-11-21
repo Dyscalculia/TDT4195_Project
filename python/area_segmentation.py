@@ -1,12 +1,13 @@
-from Task1b import *
-from Task2b import *
-from Task3c import *
-from wpa_testing import *
-from empty_check import *
+from sobel import *
+from image_tools import *
+from winner_takes_all import *
+from region_growing_method import region_growing_method
 from collections import Counter
-from PIL import ImageEnhance, ImageFilter
+import numpy as np
 import sys
 
+
+#Dictionaries translating values
 color_to_shape = {(55, 45, 148): "star", (214, 71, 53): "pacman",
                   (217, 208, 199): "hexagon1", (59, 36, 36): "hexagon2",
                   (79, 122, 61): "square", (226, 201, 59): "v",
@@ -17,7 +18,73 @@ cmd_to_board = {"e1": "easy01.png", "e2": "easy02.png",
 
 color_to_name = {(55, 45, 148): "blue", (214, 71, 53): "red"}
 
-def extract_piece(im, pos, dimensions):
+
+'''
+im              --  A PIL.Image
+dimensions      --  A tuple with dimensions of the board of form (width in cells, height in cells)
+thresh_range    --  Integer representing the tolerance used to evaluate if a cell is empty
+
+Returns:
+A list of tuples of the form (x, y) representing cells that contain an object on the board
+as well as a tuple representing the size of a cell of the form (width, height)
+
+How it works:
+It works by parting the image up into cells based on dimension and size of
+image. For each cell it runs is_empty which does an evaluation on whether a
+cell is empty or not.
+'''
+def extract_legals(im, dimensions, thresh_range):
+    width, height = im.size
+    p_width, p_height = width / dimensions[0], height / dimensions[1]
+    cells = []
+    for y in range(dimensions[1]):
+        for x in range(dimensions[0]):
+            x1, x2 = x * p_width, (x + 1) * p_width
+            y1, y2 = y * p_height, (y + 1) * p_height
+            im2 = im.crop((x1, y1, x2, y2)).crop((8, 8, 90, 90))
+            if not is_empty(im2, thresh_range):
+                cells.append((x, y))
+    return cells, (p_width, p_height)
+
+
+'''
+im          --  A PIL.Image
+legals      --  List of tuples of the form (x, y) representing cells to extract
+dimensions  --  A tuple with dimensions of the board of form (width in cells, height in cells)
+
+Returns:
+A list of PIL.Image objects of the cells spesificied by legals
+
+How it works:
+Works in a similar fashion to extract_legals, however it uses legals know
+whether or not to add a cell to the list.
+'''
+def extract_all(im, legals, dimensions):
+    width, height = im.size
+    p_width, p_height = width / dimensions[0], height / dimensions[1]
+    cells = []
+    for y in range(dimensions[1]):
+        for x in range(dimensions[0]):
+            x1, x2 = x * p_width, (x + 1) * p_width
+            y1, y2 = y * p_height, (y + 1) * p_height
+            im2 = im.crop((x1, y1, x2, y2)).crop((5, 5, 95, 95))
+            if (x, y) in legals:
+                cells.append((im2, (x, y)))
+    return cells
+
+
+'''
+im          --  A PIL.Image
+pos         --  A tuple of cell coordinates with the form (x, y)
+dimensions  --  A tuple with dimensions of the board of form (width in cells, height in cells)
+
+Returns:
+A PIL.Image object of the single cell spesificied
+
+How it works:
+Works in the exact same way as extract_all, however for a single cell.
+'''
+def extract_cell(im, pos, dimensions):
     x, y = pos
     width, height = im.size
     p_width, p_height = width / dimensions[0], height / dimensions[1]
@@ -27,49 +94,68 @@ def extract_piece(im, pos, dimensions):
     return im
 
 
-def extract_all(im, legals, dimensions):
-    width, height = im.size
-    p_width, p_height = width / dimensions[0], height / dimensions[1]
-    pieces = []
-    for y in range(dimensions[1]):
-        for x in range(dimensions[0]):
-            x1, x2 = x * p_width, (x + 1) * p_width
-            y1, y2 = y * p_height, (y + 1) * p_height
-            im2 = im.crop((x1, y1, x2, y2)).crop((5, 5, 95, 95))
-            if (x, y) in legals:
-                pieces.append((im2, (x, y)))
-    return pieces
+'''
+im          --  A binary PIL.Image
 
-
-def extract_coords(im, dimensions, thresh_range):
-    width, height = im.size
-    p_width, p_height = width / dimensions[0], height / dimensions[1]
-    pieces = []
-    for y in range(dimensions[1]):
-        for x in range(dimensions[0]):
-            x1, x2 = x * p_width, (x + 1) * p_width
-            y1, y2 = y * p_height, (y + 1) * p_height
-            im2 = im.crop((x1, y1, x2, y2)).crop((8, 8, 90, 90))
-            if not is_empty(im2, thresh_range):
-                pieces.append((x, y))
-    return pieces, (p_width, p_height)
-
-
+Returns:
+A binary PIL.Image object that is inverted if the background color is white
+'''
 def inverter(im):
-    width, height = im.size
-    m = imageToMatrix(im)
-    corner_sum = m[0][0] + m[0][1] + m[1][0]
-    corner_sum += m[0][-1] + m[0][-2] + m[1][-1]
-    corner_sum += m[-1][0] + m[-1][1] + m[-2][0]
-    corner_sum += m[-1][-1] + m[-1][-2] + m[-2][-1]
-    return invert_bin(im) if corner_sum > 6 else im
+    background = get_background_color(im)
+    return invert_bin(im) if background == 1 else im
 
 
+'''
+im          --  A binary PIL.Image
+
+Returns:
+A binary PIL.Image object that is inverted
+'''
 def invert_bin(im):
     def f(p):
         return 1 - p
     return im.point(lambda i: f(i))
 
+
+'''
+im              --  A PIL.Image
+thresh_range    --  Integer representing the tolerance
+
+Returns:
+True if cell is empty, False otherwise
+
+How it works:
+It first applies a gaussian blur to remove noise. Then we apply the sobel
+operator and look at the magnitue, once this is done we run a custom area
+growing method to create a binary image with only the strongest of edges visible.
+Lastly we sum up all the values in the picture, only when the picture has strong
+edges will the sum be greater than zero implying there is something in the cell.
+'''
+def is_empty(im, thresh_range, debug=False):
+    im = applyFilter(im, hg)
+    mx = imageToMatrix(applyFilter(im, rotateMatrix180(sx)))
+    my = imageToMatrix(applyFilter(im, rotateMatrix180(sy)))
+    mm = matrixToImage(calculateMagnitude(mx, my))
+    mm2 = region_growing_method(mm, tuple([(0, 0)]), thresh_range)
+    m = np.array(mm2)
+    if debug:
+        from_bin_to_visual(mm2).show()
+        mm.show()
+    return np.sum(m) <= 0
+
+
+'''
+im      --  A binary PIL.Image
+pos     --  A tuple of cell coordinates with the form (x, y)
+size    --  A tuple representing dimensions of a cell with form (width, height)
+
+Returns:
+Tuple of the form (x, y) representing real coordinates for the center of the shape
+
+How it works:
+It works by creating a bounding box around the shape and then find the center
+of the box.
+'''
 def get_center_pos(im, pos, size):
     width, height = size
     b_x, b_y = pos
@@ -90,6 +176,51 @@ def get_center_pos(im, pos, size):
     return r_x, r_y
 
 
+'''
+im      --  A PIL.Image
+
+Returns:
+Varies on image input;
+    Gray scale images: A single gray scale value
+    RGB images: An RGB tuple of form (red value, green value, blue value)
+
+How it works:
+A wta-modified image has gotten various shades of one color set to one spesific
+shade, as in all blues become one blue. We can therefore count up number of
+pixels with each color. We want the highest instance of color that is not the
+background color. This color represent the shape and is thus used to identify
+it. Background color is found just like in get_background_color.
+If the highest instance color that is not background color covers less than
+10 percent of the image, it assumes the background color is also the shape
+color (a star or packman).
+'''
+def get_background_color(im):
+    width, height = im.size
+    edge_colors = []
+    for i in range(width):
+        for j in range(height):
+            pixel = im.getpixel((i, j))
+            if i == 0 or j == 0 or i == width - 1 or j == height - 1:
+                edge_colors.append(pixel)
+    return Counter(edge_colors).most_common(1)[0][0]
+
+
+'''
+im      --  A wta-modified RGB PIL.Image
+
+Returns:
+A string classification of the shape
+
+How it works:
+A wta-modified image has gotten various shades of one color set to one spesific
+shade, as in all blues become one blue. We can therefore count up number of
+pixels with each color. We want the highest instance of color that is not the
+background color. This color represent the shape and is thus used to identify
+it. Background color is found just like in get_background_color.
+If the highest instance color that is not background color covers less than
+10 percent of the image, it assumes the background color is also the shape
+color (a star or packman).
+'''
 def classify(im):
     width, height = im.size
     colors = []
@@ -111,32 +242,21 @@ def classify(im):
     return color_to_shape[shape_color]
 
 
-def get_background_color(im):
-    width, height = im.size
-    edge_colors = []
-    for i in range(width):
-        for j in range(height):
-            pixel = im.getpixel((i, j))
-            if i == 0 or j == 0 or i == width - 1 or j == height - 1:
-                edge_colors.append(pixel)
-    return Counter(edge_colors).most_common(1)[0][0]
-
 if __name__ == "__main__":
-    board, display = cmd_to_board[sys.argv[1]], int(sys.argv[2])
+    board, display = cmd_to_board[sys.argv[1]], int(sys.argv[2])  # Revies command of which board to use and to display segments
     thresh_range = 65 if board[:4] == "easy" else 58
-    im1 = Image.open(getImagePath(board))
-    size = im1.size
-    coords, cell_size = extract_coords(im1, (8, 5), thresh_range)
-    pieces = extract_all(map_color_wta(im1).convert('L'), coords, (8, 5))
-    color_board = map_color_wta(im1, False)
-    background = get_background_color(extract_piece(color_board, (0, 0), (8, 5)))
-    rgb_pieces = extract_all(color_board, coords, (8, 5))
-    for i in range(len(pieces)):
-        im, pos = pieces[i]
-        rgb_im, _ = rgb_pieces[i]
-        if i == 0:
-            print(size, color_to_name[background])
-        m = inverter(region_growing_method(im, tuple([(1, 1)]), 1))
-        print(get_center_pos(m, pos, cell_size), classify(rgb_im))
-        if display:
+    board_image = Image.open(get_image_path(board))
+    size = board_image.size
+    coords, cell_size = extract_legals(board_image, (8, 5), thresh_range)
+    cells = extract_all(map_color_wta(board_image).convert('L'), coords, (8, 5))
+    wta_board_image = map_color_wta(board_image, False)
+    background = get_background_color(extract_cell(wta_board_image, (0, 0), (8, 5)))
+    rgb_cells = extract_all(wta_board_image, coords, (8, 5))
+    print(size, color_to_name[background])  # Sends tuple representing board size of form (width, height) and color of first cell
+    for i in range(len(cells)):
+        im, pos = cells[i]  # Get PIL.Image of cell i and its board position
+        rgb_im, _ = rgb_cells[i]  # Get RGB PIL.Image of cell i
+        bin_im = inverter(region_growing_method(im, tuple([(1, 1)]), 1))  # Gets a binary version of cell i
+        print(get_center_pos(bin_im, pos, cell_size), classify(rgb_im))  # Sends tuple representing real center position of object and its shape
+        if display:  # Whether to show RGB wta-modified version of a cell
             rgb_im.show()

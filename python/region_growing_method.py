@@ -1,4 +1,4 @@
-from Task1a import *
+from thresholding import *
 
 
 '''
@@ -117,12 +117,3 @@ def gen_thresholds(m, seeds):
         thresholds[seed] = (ranges[i] + 1, ranges[i + 1])
     thresholds[intensities[-1][0]] = (ranges[-1] + 1, 255)
     return thresholds
-
-
-if __name__ == "__main__":
-    I1 = Image.open(getImagePath("Fig1051(a)(defective_weld).tif")).convert('L')
-    I2 = region_growing_method(I1, ((255, 140), (200, 315), (50, 275), (450, 290)))
-    I2.show()
-    '''
-    I2.save(getImagePath("Task-1b-growth-method.png", True))
-    '''
