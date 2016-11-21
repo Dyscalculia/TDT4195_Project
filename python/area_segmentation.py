@@ -9,10 +9,10 @@ import sys
 
 color_to_shape = {(55, 45, 148): "star", (214, 71, 53): "pacman",
                   (217, 208, 199): "hexagon1", (59, 36, 36): "hexagon2",
-                  (79, 122, 61): "sqare", (226, 201, 59): "v",
+                  (79, 122, 61): "square", (226, 201, 59): "v",
                   (176, 63, 119): "triangle"}
 
-cmd_to_board = {"e1": "easy01.png", "e2": "easy01.png",
+cmd_to_board = {"e1": "easy01.png", "e2": "easy02.png",
                 "d1": "difficult01.png", "d2": "difficult02.png"}
 
 color_to_name = {(55, 45, 148): "blue", (214, 71, 53): "red"}
@@ -41,7 +41,7 @@ def extract_all(im, legals, dimensions):
     return pieces
 
 
-def extract_coords(im, dimensions):
+def extract_coords(im, dimensions, thresh_range):
     width, height = im.size
     p_width, p_height = width / dimensions[0], height / dimensions[1]
     pieces = []
@@ -50,7 +50,7 @@ def extract_coords(im, dimensions):
             x1, x2 = x * p_width, (x + 1) * p_width
             y1, y2 = y * p_height, (y + 1) * p_height
             im2 = im.crop((x1, y1, x2, y2)).crop((8, 8, 90, 90))
-            if not is_empty(im2):
+            if not is_empty(im2, thresh_range):
                 pieces.append((x, y))
     return pieces, (p_width, p_height)
 
@@ -122,10 +122,11 @@ def get_background_color(im):
     return Counter(edge_colors).most_common(1)[0][0]
 
 if __name__ == "__main__":
-    board = cmd_to_board[sys.argv[1]]
+    board, display = cmd_to_board[sys.argv[1]], int(sys.argv[2])
+    thresh_range = 65 if board[:4] == "easy" else 58
     im1 = Image.open(getImagePath(board))
     size = im1.size
-    coords, cell_size = extract_coords(im1, (8, 5))
+    coords, cell_size = extract_coords(im1, (8, 5), thresh_range)
     pieces = extract_all(map_color_wta(im1).convert('L'), coords, (8, 5))
     color_board = map_color_wta(im1, False)
     background = get_background_color(extract_piece(color_board, (0, 0), (8, 5)))
@@ -137,4 +138,5 @@ if __name__ == "__main__":
             print(size, color_to_name[background])
         m = inverter(region_growing_method(im, tuple([(1, 1)]), 1))
         print(get_center_pos(m, pos, cell_size), classify(rgb_im))
-        rgb_im.show()
+        if display:
+            rgb_im.show()

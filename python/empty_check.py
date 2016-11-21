@@ -2,14 +2,14 @@ from area_segmentation import *
 from Task2b import *
 
 
-def is_empty(im, debug=False):
+def is_empty(im, thresh_range, debug=False):
     #im.show()
     im = applyFilter(im, hg)
     #im = g2(im, 1.3)
     mx = imageToMatrix(applyFilter(im, rotateMatrix180(sx)))
     my = imageToMatrix(applyFilter(im, rotateMatrix180(sy)))
     mm = matrixToImage(calculateMagnitude(mx, my))
-    mm2 = region_growing_method(mm, tuple([(0, 0)]), 58)
+    mm2 = region_growing_method(mm, tuple([(0, 0)]), thresh_range)
     m = np.array(mm2)
     if debug:
         from_bin_to_visual(mm2).show()
