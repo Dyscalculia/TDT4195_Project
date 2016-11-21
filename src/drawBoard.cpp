@@ -1,15 +1,11 @@
+// To allow the use of the M_PI value.
 #define _USE_MATH_DEFINES
 
 #include "program.hpp"
 #include "gloom/gloom.hpp"
 #include "gloom/shader.hpp"
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "glm/ext.hpp"
-#include <glm/mat4x4.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/vec3.hpp>
 #include <math.h>
 #include "drawBoard.h"
 #include "boardHelpers.h"
@@ -26,7 +22,7 @@ unsigned int CreateHourglass(struct Range xRange, struct Range yRange, float z, 
 	unsigned int* indices = new unsigned int[indicesCount];
 	float* colors = new float[colorCount];
 
-	unsigned int indicesWritePos = 0, nextDrawNumber = 0, colorWritePos = 0;
+	unsigned int indicesWritePos = 0, nextDrawNumber = 0;
 
 	// Triangle 1
 	UpdateVertexAndColorBuffer(nextDrawNumber, { xRange.start, yRange.end, z }, color, vertices, colors);
@@ -35,7 +31,6 @@ unsigned int CreateHourglass(struct Range xRange, struct Range yRange, float z, 
 	indices[indicesWritePos++] = nextDrawNumber++;
 	UpdateVertexAndColorBuffer(nextDrawNumber, { (xRange.start + xRange.end) / 2.0f, yRange.start, z }, color, vertices, colors);
 	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
 
 	// Triangle 2
 	UpdateVertexAndColorBuffer(nextDrawNumber, { xRange.start, yRange.start, z }, color, vertices, colors);
@@ -43,8 +38,7 @@ unsigned int CreateHourglass(struct Range xRange, struct Range yRange, float z, 
 	UpdateVertexAndColorBuffer(nextDrawNumber, { xRange.end, yRange.start, z }, color, vertices, colors);
 	indices[indicesWritePos++] = nextDrawNumber++;
 	UpdateVertexAndColorBuffer(nextDrawNumber, { (xRange.start + xRange.end) / 2.0f, yRange.end, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
+	indices[indicesWritePos] = nextDrawNumber;
 
 	unsigned int vao_id = CreateVAOWithTriangles(vertices, colors, indices, vertexCount, colorCount, indicesCount, vaoid);
 
@@ -157,7 +151,7 @@ unsigned int CreateTriangle(struct Range xRange, struct Range yRange, float z, f
 	indices[indicesWritePos++] = nextDrawNumber++;
 	UpdateVertexAndColorBuffer(nextDrawNumber, { xRange.end, yRange.start, z }, color, vertices, colors);
 	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { (xRange.end + xRange.start)/2.0f, yRange.end, z }, color, vertices, colors);
+	UpdateVertexAndColorBuffer(nextDrawNumber, { (xRange.end + xRange.start) / 2.0f, yRange.end, z }, color, vertices, colors);
 	indices[indicesWritePos++] = nextDrawNumber++;
 	colorWritePos += 12;
 	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
@@ -184,7 +178,7 @@ unsigned int CreatePacman(struct CoordinateXY center, float radius, float z, flo
 
 	unsigned int indicesWritePos = 0, nextDrawNumber = 0, colorWritePos = 0;
 
-	float iIncrease = 360.0f / (float)trianglesAmount;
+	float iIncrease = 360.0f / static_cast<float>(trianglesAmount);
 
 	for (float i = 0.0f, x = 0.0f, y = 0.0f; i < 359; i += iIncrease)
 	{
@@ -285,62 +279,6 @@ unsigned int CreateHexagon(struct CoordinateXY center, float radius, float z, fl
 	indices[indicesWritePos++] = nextDrawNumber++;
 	colorWritePos += 12;
 	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	/*
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x - radius, center.y + radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x - radius, center.y - radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x + radius, center.y - radius/2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x + radius, center.y + radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x , center.y + radius, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x - radius, center.y + radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x + radius, center.y + radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x , center.y + radius, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x - radius, center.y - radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x , center.y - radius, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x, center.y, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x , center.y - radius, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	UpdateVertexAndColorBuffer(nextDrawNumber, { center.x + radius, center.y - radius / 2.0f, z }, color, vertices, colors);
-	indices[indicesWritePos++] = nextDrawNumber++;
-	colorWritePos += 12;
-	ExtrudedTriangle(vertices, indices, colors, &indicesWritePos, &nextDrawNumber, &colorWritePos, height);
-	*/
 
 	unsigned int vao_id = CreateVAOWithTriangles(vertices, colors, indices, vertexCount, colorCount, indicesCount, vaoid);
 

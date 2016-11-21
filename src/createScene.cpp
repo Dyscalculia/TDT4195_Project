@@ -1,3 +1,11 @@
+/**
+TDT4195 Visual Computing Fundamentals, Project Fall 2016
+createScene.cpp
+Purpose: Contains code to add nodes to the Scene Graph tree.
+
+@author Stian Hanssen, Håkon Hukkelås, Magnus Melseth Karlsen
+*/
+
 #include "sceneGraph.hpp"
 #include "drawBoard.h"
 
@@ -27,7 +35,7 @@ SceneNode* AddSquare(float z, float squareLenX, float squareLenY, struct ColorRG
 	return snSquare;
 }
 
-SceneNode* AddSquareSkewd(float z, float squareLenX, float squareLenY, struct ColorRGBA color)
+SceneNode* AddSquareSkewd(float z, struct CoordinateXY center, float drawLenX, float drawLenY, struct ColorRGBA color)
 {
 	SceneNode* snSquare = createSceneNode();
 	snSquare->x = 0.0; snSquare->y = 0.0; snSquare->z = z;
@@ -36,12 +44,12 @@ SceneNode* AddSquareSkewd(float z, float squareLenX, float squareLenY, struct Co
 	snSquare->indicesCount = 48;
 	snSquare->liftSpeed = 5.0f;
 	snSquare->animationSpeed = 5.0f;
-	snSquare->vertexArrayObjectID = CreateSquareSkewd({ squareLenX / 8.0f, squareLenX - squareLenX / 3.0f }, { squareLenY / 8.0f, squareLenY - squareLenY / 8.0f }, 0.0, -0.1f, color);
+	snSquare->vertexArrayObjectID = CreateSquareSkewd({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) - 1.0f }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
 
 	return snSquare;
 }
 
-SceneNode* AddTriangle(float z, float squareLenX, float squareLenY, struct ColorRGBA color)
+SceneNode* AddTriangle(float z, struct CoordinateXY center, float drawLenX, float drawLenY, struct ColorRGBA color)
 {
 	SceneNode* snTriangle = createSceneNode();
 	snTriangle->x = 0.0; snTriangle->y = 0.0; snTriangle->z = z;
@@ -50,7 +58,7 @@ SceneNode* AddTriangle(float z, float squareLenX, float squareLenY, struct Color
 	snTriangle->indicesCount = 24;
 	snTriangle->liftSpeed = 5.0f;
 	snTriangle->animationSpeed = 5.0f;
-	snTriangle->vertexArrayObjectID = CreateTriangle({ 0.4f, squareLenX - 0.4f }, { 0.4f, squareLenY - 0.4f }, 0.0, -0.1f, color);
+	snTriangle->vertexArrayObjectID = CreateTriangle({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
 
 	return snTriangle;
 }
@@ -64,7 +72,7 @@ SceneNode* AddPacman(float z, struct CoordinateXY center, float radius, struct C
 	snPacman->indicesCount = 6 * 4 * 100 * 2;
 	snPacman->liftSpeed = 5.0f;
 	snPacman->animationSpeed = 5.0f;
-	snPacman->vertexArrayObjectID = CreatePacman(center, radius - 0.4f, 0.0, -0.1f, 100, color);
+	snPacman->vertexArrayObjectID = CreatePacman(center, radius, 0.0, -0.1f, 100, color);
 
 	return snPacman;
 }
@@ -78,11 +86,11 @@ SceneNode* AddHexagon(float z, struct CoordinateXY center, float radius, struct 
 	snHexagon->indicesCount = 12 * 3 * 2 + 6 * 3 * 6;
 	snHexagon->liftSpeed = 5.0f;
 	snHexagon->animationSpeed = 5.0f;
-	snHexagon->vertexArrayObjectID = CreateHexagon(center, radius - 0.4f, 0.0, -0.1f, color);
+	snHexagon->vertexArrayObjectID = CreateHexagon(center, radius, 0.0, -0.1f, color);
 	return snHexagon;
 }
 
-SceneNode* AddV(float z, float squareLenX, float squareLenY, struct ColorRGBA color)
+SceneNode* AddV(float z, struct CoordinateXY center, float drawLenX, float drawLenY, struct ColorRGBA color)
 {
 	SceneNode* snV = createSceneNode();
 	snV->x = 0.0; snV->y = 0.0; snV->z = z;
@@ -91,12 +99,12 @@ SceneNode* AddV(float z, float squareLenX, float squareLenY, struct ColorRGBA co
 	snV->indicesCount = 12 * 2 + 6 * 3 * 4;
 	snV->liftSpeed = 5.0f;
 	snV->animationSpeed = 5.0f;
-	snV->vertexArrayObjectID = CreateV({ 0.4f, squareLenX - 0.4f }, { 0.4f, squareLenY - 0.4f }, 0.0, -0.1f, color);
+	snV->vertexArrayObjectID = CreateV({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
 
 	return snV;
 }
 
-SceneNode* AddStar(float z, struct CoordinateXY center,float radius, struct ColorRGBA color)
+SceneNode* AddStar(float z, struct CoordinateXY center, float radius, struct ColorRGBA color)
 {
 	SceneNode* snStar = createSceneNode();
 	snStar->x = 0.0; snStar->y = 0.0; snStar->z = z;
@@ -105,7 +113,7 @@ SceneNode* AddStar(float z, struct CoordinateXY center,float radius, struct Colo
 	snStar->indicesCount = 6 * 5 + 6 * 3 * 5;
 	snStar->liftSpeed = 5.0f;
 	snStar->animationSpeed = 5.0f;
-	snStar->vertexArrayObjectID = CreateStar(center, radius - 0.4f, 0.0, -0.1f, color);
+	snStar->vertexArrayObjectID = CreateStar(center, radius, 0.0, -0.1f, color);
 
 	return snStar;
 }

@@ -2,8 +2,9 @@
 #define EXECPYTHONSCRIPT_HPP
 #pragma once
 
-#include <string>
 #include "sceneGraph.hpp"
+
+extern bool USE_INPUT_CENTER_OF_SHAPE;
 
 void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY, const char* cmd);
 void ReadEasy1(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY);
