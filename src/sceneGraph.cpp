@@ -105,7 +105,7 @@ void printNode(SceneNode* node) {
 // we keep track here with a global variable whether this has happened previously.
 bool isRandomInitialised = false;
 
-float random() {
+float random1() {
 	if (!isRandomInitialised) {
 		// Initialise the random number generator using the current time as a seed
 		srand(static_cast <unsigned> (time(0)));

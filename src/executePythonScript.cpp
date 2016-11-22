@@ -46,7 +46,7 @@ struct CoordinateXY translateCoordinatesToCenterOfSquare(struct CoordinateXY coo
 	unsigned int xPos = static_cast<unsigned int>(coord.x) % static_cast<unsigned int>(origSquareXLen);
 	unsigned int yPos = static_cast<unsigned int>(coord.y) % static_cast<unsigned int>(origSquareYLen);
 
-	return{ (origSquareXLen - 1.0f - static_cast<float>(xPos)) / origSquareXLen * boardSquareXLen, (origSquareYLen - 1.0f - static_cast<float>(yPos)) / origSquareYLen * boardSquareYLen };
+	return{ static_cast<float>(xPos) / origSquareXLen * boardSquareXLen, (origSquareYLen - 1.0f - static_cast<float>(yPos)) / origSquareYLen * boardSquareYLen };
 }
 
 std::vector<std::string> split(const std::string &s, char splitchr)
@@ -95,8 +95,10 @@ void drawInstruction(SceneNode** BoardNode, std::string type, unsigned int x, un
 	if (USE_INPUT_CENTER_OF_SHAPE)
 	{
 		centerOfShape = translateCoordinatesToCenterOfSquare({ static_cast<float>(x), static_cast<float>(y) }, origxRange, origyRange, boardxRange, boardyRange, squaresX, squaresY);
-		lenToClosestEdgeX = fmin(centerOfShape.x, squareLenX - centerOfShape.x) - 0.1f;
-		lenToClosestEdgeY = fmin(centerOfShape.y, squareLenY - centerOfShape.y) - 0.1f;
+		//lenToClosestEdgeX = fmin(centerOfShape.x, squareLenX - centerOfShape.x) - 0.1f;
+		//lenToClosestEdgeY = fmin(centerOfShape.y, squareLenY - centerOfShape.y) - 0.1f;
+		lenToClosestEdgeX = squareLenX / 2.0f - 0.4f;
+		lenToClosestEdgeY = squareLenY / 2.0f - 0.4f;
 	}
 	else
 	{

@@ -77,7 +77,7 @@ void removeChild(SceneNode* parent, SceneNode* child);
 void printNode(SceneNode* node);
 
 // Utility functions
-float random();
+float random1();
 double getTimeDeltaSeconds();
 float toRadians(float angleDegrees);
 
