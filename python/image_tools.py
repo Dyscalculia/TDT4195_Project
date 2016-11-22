@@ -1,7 +1,21 @@
-from PIL import Image
+from PIL import Image, ImageDraw
 from random import randint
 from math import floor
 import os
+
+
+'''
+im      --  A PIL.Image
+padding --  Number of black pixels to pad around image
+
+Returns:
+The padded image
+'''
+def edge_padding(im, padding):
+    width, height = im.size
+    background = Image.new('L', (width + padding * 2, height + padding * 2))
+    background.paste(im, (padding, padding))
+    return background
 
 
 '''

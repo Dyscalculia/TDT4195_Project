@@ -1,6 +1,8 @@
 from sobel import *
+from thresholding import from_bin_to_visual
 from image_tools import *
 from winner_takes_all import *
+from morph import *
 from region_growing_method import region_growing_method
 from collections import Counter
 import numpy as np
@@ -17,6 +19,32 @@ cmd_to_board = {"e1": "easy01.png", "e2": "easy02.png",
                 "d1": "difficult01.png", "d2": "difficult02.png"}
 
 color_to_name = {(55, 45, 148): "blue", (214, 71, 53): "red"}
+
+
+'''
+im          --  A binary PIL.Image
+
+Returns:
+A refined binary PIL.Image object
+
+How it works:
+Converts image to binary. Some of the images will only have edges and thus need
+to be filled inn. In order to do that we must make sure the edge has no holes
+where the area growing method can leak. We close these holes with dialation.
+We then do an inverse fill, by applying region growing to the background and
+put everything else as white. Lastly we erode the image, so the shape returns
+to its original size and remove noise.
+'''
+def refine_shape(im):
+    bin_im = region_growing_method(edge_padding(im, 1), tuple([(0, 0)]), 1)
+    bin_m = imageToMatrix(bin_im)
+    bin_d = dialation(bin_m, generate_circle_array(6))
+    bin_im2 = edge_padding(matrixToImage(bin_d), 1)
+    bin_im2 = region_growing_method(bin_im2, tuple([(0, 0)]), 1)
+    bin_m2 = imageToMatrix(bin_im2)
+    bin_e = erosion(bin_m2, generate_circle_array(8))
+    bin_im3 = matrixToImage(bin_e)
+    return bin_im3
 
 
 '''
@@ -41,7 +69,7 @@ def extract_legals(im, dimensions, thresh_range):
         for x in range(dimensions[0]):
             x1, x2 = x * p_width, (x + 1) * p_width
             y1, y2 = y * p_height, (y + 1) * p_height
-            im2 = im.crop((x1, y1, x2, y2)).crop((8, 8, 90, 90))
+            im2 = im.crop((x1, y1, x2, y2)).crop((8, 8, p_width - 10,  p_height - 10))
             if not is_empty(im2, thresh_range):
                 cells.append((x, y))
     return cells, (p_width, p_height)
@@ -67,7 +95,7 @@ def extract_all(im, legals, dimensions):
         for x in range(dimensions[0]):
             x1, x2 = x * p_width, (x + 1) * p_width
             y1, y2 = y * p_height, (y + 1) * p_height
-            im2 = im.crop((x1, y1, x2, y2)).crop((5, 5, 95, 95))
+            im2 = im.crop((x1, y1, x2, y2)).crop((2, 2, p_width - 4,  p_height - 4))
             if (x, y) in legals:
                 cells.append((im2, (x, y)))
     return cells
@@ -90,31 +118,8 @@ def extract_cell(im, pos, dimensions):
     p_width, p_height = width / dimensions[0], height / dimensions[1]
     x1, x2 = x * p_width, (x + 1) * p_width
     y1, y2 = y * p_height, (y + 1) * p_height
-    im = im.crop((x1, y1, x2, y2)).crop((5, 5, 95, 95))
+    im = im.crop((x1, y1, x2, y2)).crop((4, 4, p_width - 4,  p_height - 4))
     return im
-
-
-'''
-im          --  A binary PIL.Image
-
-Returns:
-A binary PIL.Image object that is inverted if the background color is white
-'''
-def inverter(im):
-    background = get_background_color(im)
-    return invert_bin(im) if background == 1 else im
-
-
-'''
-im          --  A binary PIL.Image
-
-Returns:
-A binary PIL.Image object that is inverted
-'''
-def invert_bin(im):
-    def f(p):
-        return 1 - p
-    return im.point(lambda i: f(i))
 
 
 '''
@@ -157,6 +162,7 @@ It works by creating a bounding box around the shape and then find the center
 of the box.
 '''
 def get_center_pos(im, pos, size):
+    im = edge_padding(im, int((size[0] - im.size[0]) / 2))
     width, height = size
     b_x, b_y = pos
     m = imageToMatrix(im)
@@ -171,9 +177,15 @@ def get_center_pos(im, pos, size):
                 min_y = min(min_y, y)
                 max_x = max(max_x, x)
                 max_y = max(max_y, y)
-    r_x = int((abs(max_x - min_x) / 2) + (b_x * width))
-    r_y = int((abs(max_y - min_y) / 2) + (b_y * height))
+    r_x = int((abs(max_x - min_x) / 2) + (b_x * width) + min_x)
+    r_y = int((abs(max_y - min_y) / 2) + (b_y * height) + min_y)
     return r_x, r_y
+
+
+def calc_circle(x, y, cell_dim, offset, inv_offset):
+    x1, y1 = (x * cell_dim) + offset, (y * cell_dim) + offset
+    x2, y2 = x1 + inv_offset, y1 + inv_offset
+    return [x1, y1, x2, y2]
 
 
 '''
@@ -256,7 +268,7 @@ if __name__ == "__main__":
     for i in range(len(cells)):
         im, pos = cells[i]  # Get PIL.Image of cell i and its board position
         rgb_im, _ = rgb_cells[i]  # Get RGB PIL.Image of cell i
-        bin_im = inverter(region_growing_method(im, tuple([(1, 1)]), 1))  # Gets a binary version of cell i
+        bin_im = refine_shape(im)  # Extract a binary segmented image of im
         print(get_center_pos(bin_im, pos, cell_size), classify(rgb_im))  # Sends tuple representing real center position of object and its shape
         if display:  # Whether to show RGB wta-modified version of a cell
-            rgb_im.show()
+            from_bin_to_visual(bin_im).show()
