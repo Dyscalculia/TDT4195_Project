@@ -46,6 +46,11 @@ struct CoordinateXY translateCoordinatesToCenterOfSquare(struct CoordinateXY coo
 	unsigned int xPos = static_cast<unsigned int>(coord.x) % static_cast<unsigned int>(origSquareXLen);
 	unsigned int yPos = static_cast<unsigned int>(coord.y) % static_cast<unsigned int>(origSquareYLen);
 
+	if (xPos < 30.0f || xPos > 70.0f)
+		xPos = 50.0f;
+	if (yPos < 30.0f || yPos > 70.0f)
+		yPos = 50.0f;
+
 	return{ static_cast<float>(xPos) / origSquareXLen * boardSquareXLen, (origSquareYLen - 1.0f - static_cast<float>(yPos)) / origSquareYLen * boardSquareYLen };
 }
 
