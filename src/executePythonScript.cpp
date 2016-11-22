@@ -18,7 +18,7 @@ Purpose: Code for executing the python script which processes the image files.
 #include "sceneGraph.hpp"
 #include "createScene.h"
 
-bool USE_INPUT_CENTER_OF_SHAPE = false;
+bool USE_INPUT_CENTER_OF_SHAPE = true;
 
 struct ColorRGBA color1 = { 1.0, 0.0, 0.0, 1.0 };
 struct ColorRGBA color2 = { 0.3f, 0.3f, 0.9f, 1.0 };
@@ -97,8 +97,8 @@ void drawInstruction(SceneNode** BoardNode, std::string type, unsigned int x, un
 		centerOfShape = translateCoordinatesToCenterOfSquare({ static_cast<float>(x), static_cast<float>(y) }, origxRange, origyRange, boardxRange, boardyRange, squaresX, squaresY);
 		//lenToClosestEdgeX = fmin(centerOfShape.x, squareLenX - centerOfShape.x) - 0.1f;
 		//lenToClosestEdgeY = fmin(centerOfShape.y, squareLenY - centerOfShape.y) - 0.1f;
-		lenToClosestEdgeX = squareLenX / 2.0f - 0.4f;
-		lenToClosestEdgeY = squareLenY / 2.0f - 0.4f;
+		lenToClosestEdgeX = squareLenX / 2.0f - 0.8f;
+		lenToClosestEdgeY = squareLenY / 2.0f - 0.8f;
 	}
 	else
 	{
@@ -124,7 +124,10 @@ void drawInstruction(SceneNode** BoardNode, std::string type, unsigned int x, un
 	else if (type == "v")
 		snShape = AddV(0.3f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 1.0, 1.0, 0.0, 1.0f });
 	else
+	{
+		printf("ERROR: unrecognizable type %s\n", type);
 		throw std::invalid_argument("Received unrecognizable input");
+	}
 
 	addChild((*BoardNode)->children[index], snShape);
 }
@@ -173,7 +176,7 @@ void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int Squares
 	while (std::getline(strm, line))
 	{
 		getContent(line, &linex, &liney, &lineInfo);
-		std::cout << linex << " " << liney << " " << lineInfo << std::endl;
+		std::cout << linex << " " << liney << " |" << lineInfo << "|" << std::endl;
 		drawInstruction(BoardNode, lineInfo, linex, liney, origxRange, origyRange, boardxRange, boardyRange, SquaresX, SquaresY, squareLenX, squareLenY);
 	}
 }

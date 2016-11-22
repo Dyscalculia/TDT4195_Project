@@ -10,6 +10,7 @@ Purpose: Contains the rendering loop, and code to move and animate different par
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
+#include <iostream>
 #include "boardHelpers.h"
 #include "executePythonScript.h"
 #include "glm/ext.hpp"
@@ -61,6 +62,24 @@ bool shakingRight = false;
 
 void runProgram(GLFWwindow* window)
 {
+	std::cout << "Remember to add all the python files to the running directory!" << std::endl;
+	std::cout << "Remember to add all the shader files to the running directory!" << std::endl << std::endl;
+
+	std::cout << "Using center of shape given by python script: " << ((USE_INPUT_CENTER_OF_SHAPE) ? "True" : "False") << ". Change this by pressing \"k\"." << std::endl << std::endl;
+	std::cout << "Change the camera by pressing:" << std::endl;
+	std::cout << "\t[1]: Birdseye view" << std::endl;
+	std::cout << "\t[2]: Angled view" << std::endl;
+	std::cout << "\t[3]: Angled view 2 with rotation" << std::endl;
+	std::cout << "\t[4]: Angled view 3" << std::endl;
+	std::cout << "Load the different boards by pressing:" << std::endl;
+	std::cout << "\t[7]: Easy 1" << std::endl;
+	std::cout << "\t[8]: Easy 2" << std::endl;
+	std::cout << "\t[9]: Difficult 1" << std::endl;
+	std::cout << "\t[0]: Difficult 2" << std::endl;
+	std::cout << "You can move shapes around by pressing:" << std::endl;
+	std::cout << "\t[n]: Select next shape" << std::endl;
+	std::cout << "\t[Arrows]: Move shape around" << std::endl;
+
 	// The amount of squares to draw in the board
 	SquaresX = 8;
 	SquaresY = 5;
@@ -304,6 +323,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 	{
 		// Toggle using input center of shapes
 		USE_INPUT_CENTER_OF_SHAPE = !USE_INPUT_CENTER_OF_SHAPE;
+		std::cout << "Toggeling. Using center of shape reported by python script (new value): " << ((USE_INPUT_CENTER_OF_SHAPE) ? "True" : "False") << ". Reload the board to see the change in action." << std::endl;
 	}
 }
 

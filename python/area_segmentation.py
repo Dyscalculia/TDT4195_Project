@@ -182,12 +182,6 @@ def get_center_pos(im, pos, size):
     return r_x, r_y
 
 
-def calc_circle(x, y, cell_dim, offset, inv_offset):
-    x1, y1 = (x * cell_dim) + offset, (y * cell_dim) + offset
-    x2, y2 = x1 + inv_offset, y1 + inv_offset
-    return [x1, y1, x2, y2]
-
-
 '''
 im      --  A PIL.Image
 
