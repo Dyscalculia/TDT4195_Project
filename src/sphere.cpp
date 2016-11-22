@@ -5,7 +5,6 @@
 // Creates a VAO containing a sphere with a resolution specified by slices and layers, with a radius of 1.
 
 unsigned int createCircleVAO(unsigned int slices, unsigned int layers, float r, float g, float b, float a) {
-
 	// Calculating how large our buffers have to be
 	// The sphere is defined as layers containing rectangles. Each rectangle requires us to draw two triangles
 	const unsigned int PRIMITIVES_PER_RECTANGLE = 2;
@@ -25,10 +24,10 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers, float r, 
 
 	// Slices require us to define a full revolution worth of triangles.
 	// Layers only requires angle varying between the bottom and the top (a layer only covers half a circle worth of angles)
-	const float degreesPerLayer = 180.0 / (float) layers;
-	const float degreesPerSlice = 360.0 / (float) slices;
+	const float degreesPerLayer = 180.0 / (float)layers;
+	const float degreesPerSlice = 360.0 / (float)slices;
 
-	// Keeping track of the triangle index in the buffer. 
+	// Keeping track of the triangle index in the buffer.
 	// This implementation is fairly naive in the sense that it does not reuse vertices with the index buffer.
 	int i = 0;
 
@@ -40,7 +39,7 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers, float r, 
 		float currentAngleZDegrees = degreesPerLayer * layer;
 		float nextAngleZDegrees = degreesPerLayer * nextLayer;
 
-		// All coordinates within a single layer share z-coordinates. 
+		// All coordinates within a single layer share z-coordinates.
 		// So we can calculate those of the current and subsequent layer here.
 		float currentZ = -cos(toRadians(currentAngleZDegrees));
 		float nextZ = -cos(toRadians(nextAngleZDegrees));
@@ -52,7 +51,6 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers, float r, 
 
 		// Now we can move on to constructing individual slices within a layer
 		for (int slice = 0; slice < slices; slice++) {
-			
 			// The direction of the start and the end of the slice in the xy-plane
 			float currentSliceAngleDegrees = slice * degreesPerSlice;
 			float nextSliceAngleDegrees = (slice + 1) * degreesPerSlice;
@@ -67,7 +65,7 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers, float r, 
 			// Now we have all information needed to create triangles
 
 			// Triangle 1
-			
+
 			vertices[3 * i + 0] = radius * currentDirectionX;
 			vertices[3 * i + 1] = radius * currentDirectionY;
 			vertices[3 * i + 2] = currentZ;

@@ -1,12 +1,16 @@
-// To allow the use of the M_PI value.
-#define _USE_MATH_DEFINES
+/**
+TDT4195 Visual Computing Fundamentals, Project Fall 2016
+drawBoard.cpp
+Purpose: Creates vertex array objects for many different shapes.
 
+@author Stian Hanssen, Håkon Hukkelås, Magnus Melseth Karlsen
+*/
+
+#include <glm/glm.hpp>
 #include "program.hpp"
 #include "gloom/gloom.hpp"
 #include "gloom/shader.hpp"
-#include <glm/glm.hpp>
 #include "glm/ext.hpp"
-#include <math.h>
 #include "drawBoard.h"
 #include "boardHelpers.h"
 #include "sceneGraph.hpp"
@@ -180,7 +184,7 @@ unsigned int CreatePacman(struct CoordinateXY center, float radius, float z, flo
 
 	float iIncrease = 360.0f / static_cast<float>(trianglesAmount);
 
-	for (float i = 0.0f, x = 0.0f, y = 0.0f; i < 359; i += iIncrease)
+	for (float i = 0.0f, x, y; i < 359; i += iIncrease)
 	{
 		if (i > 180 && i < 270)
 			continue;
@@ -427,6 +431,7 @@ void ExtrudedTriangle(float* vertices, unsigned int* indices, float* colors, uns
 	unsigned int indicesWritePos = *indicesWritePosPtr;
 	unsigned int currentColorCount = *colorWritePosPtr;
 
+	// Copies the coordinates for the last triangle
 	for (int i = 0; i < 9; i += 3)
 	{
 		vertices[currentVertexCount + i + 0] = vertices[currentVertexCount - (9 - i - 0)];
@@ -434,6 +439,7 @@ void ExtrudedTriangle(float* vertices, unsigned int* indices, float* colors, uns
 		vertices[currentVertexCount + i + 2] = vertices[currentVertexCount - (9 - i - 2)] + zDifference;
 	}
 
+	// Copies the colors for the last triangle
 	for (int i = 0; i < 12; i += 4)
 	{
 		colors[currentColorCount + i + 0] = colors[currentColorCount - (12 - i - 0)];
@@ -441,6 +447,8 @@ void ExtrudedTriangle(float* vertices, unsigned int* indices, float* colors, uns
 		colors[currentColorCount + i + 2] = colors[currentColorCount - (12 - i - 2)];
 		colors[currentColorCount + i + 3] = colors[currentColorCount - (12 - i - 3)];
 	}
+
+	// Creates the "walls"/sides between the top and bottom triangle. No new vertices are added.
 
 	// Bottom
 	indices[indicesWritePos++] = currentIndicesStart + 0;
@@ -474,6 +482,7 @@ void ExtrudedTriangle(float* vertices, unsigned int* indices, float* colors, uns
 	indices[indicesWritePos++] = currentIndicesStart + 1;
 	indices[indicesWritePos++] = currentIndicesStart + 2;
 
+	// Update the pointers so whatever called this function knows how much information has been added.
 	*nextDrawNumberPtr += 3;
 	*indicesWritePosPtr = indicesWritePos;
 	*colorWritePosPtr += 12;
@@ -502,7 +511,7 @@ unsigned int CreateVAOWithTriangles(float* vertexCoordinates, float* vertexRGBA,
 	glBindBuffer(GL_ARRAY_BUFFER, vboVertexid); // Bind the VBO, telling the driver it's a VBO
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(float), vertexCoordinates, GL_STATIC_DRAW); // Transfer data to the GPU
 	unsigned int vertexAttribID1 = 0;
-	glVertexAttribPointer(vertexAttribID1, 3, GL_FLOAT, GL_FALSE, 0, 0); // Sets the format of the buffer. 3 = x,y,z
+	glVertexAttribPointer(vertexAttribID1, 3, GL_FLOAT, GL_FALSE, 0, nullptr); // Sets the format of the buffer. 3 = x,y,z
 	glEnableVertexAttribArray(vertexAttribID1); // Enable VBO to serve as input to the rendering pipeline
 
 	// Create Color VBO
@@ -511,7 +520,7 @@ unsigned int CreateVAOWithTriangles(float* vertexCoordinates, float* vertexRGBA,
 	glBindBuffer(GL_ARRAY_BUFFER, vboColorid); // Bind the VBO, telling the driver it's a VBO
 	glBufferData(GL_ARRAY_BUFFER, colorCount * sizeof(float), vertexRGBA, GL_STATIC_DRAW); // Transfer data to the GPU
 	unsigned int colorAttribID1 = 1;
-	glVertexAttribPointer(colorAttribID1, 4, GL_FLOAT, GL_FALSE, 0, 0); // Sets the format of the buffer. 4 = rgba
+	glVertexAttribPointer(colorAttribID1, 4, GL_FLOAT, GL_FALSE, 0, nullptr); // Sets the format of the buffer. 4 = rgba
 	glEnableVertexAttribArray(colorAttribID1); // Enable VBO to serve as input to the rendering pipeline
 
 	// Index buffer:

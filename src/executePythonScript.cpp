@@ -1,3 +1,11 @@
+/**
+TDT4195 Visual Computing Fundamentals, Project Fall 2016
+executePythonScript.cpp
+Purpose: Code for executing the python script which processes the image files.
+
+@author Stian Hanssen, Håkon Hukkelås, Magnus Melseth Karlsen
+*/
+
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -9,8 +17,6 @@
 #include "boardHelpers.h"
 #include "sceneGraph.hpp"
 #include "createScene.h"
-#include <math.h>
-#include "program.hpp"
 
 bool USE_INPUT_CENTER_OF_SHAPE = false;
 
@@ -19,33 +25,28 @@ struct ColorRGBA color2 = { 0.3f, 0.3f, 0.9f, 1.0 };
 
 unsigned int translateCoordinatesToArrayIndex(struct CoordinateXY coord, struct Range xRange, struct Range yRange, unsigned int squaresX, unsigned int squaresY)
 {
-	float squareXLen = (xRange.end - xRange.start) / (float)squaresX;
-	float squareYLen = (yRange.end - yRange.start) / (float)squaresY;
+	float squareXLen = (xRange.end - xRange.start) / static_cast<float>(squaresX);
+	float squareYLen = (yRange.end - yRange.start) / static_cast<float>(squaresY);
 
 	unsigned int xPos = coord.x / squareXLen;
 	unsigned int yPos = coord.y / squareYLen;
-
-	//printf("a %i\n", yPos);
-	//unsigned int yPosInversAddition = squaresY + (yPos - 2 * (yPos + 1) + 1);
 	unsigned int yPosInversAddition = squaresY - 1 - yPos;
-	//printf("b %i\n", yPosInversAddition);
 
-	//printf("c %i\n", yPosInversAddition * squaresX + xPos);
 	return yPosInversAddition * squaresX + xPos;
 }
 
 struct CoordinateXY translateCoordinatesToCenterOfSquare(struct CoordinateXY coord, struct Range origxRange, struct Range origyRange, struct Range boardxRange, struct Range boardyRange, unsigned int squaresX, unsigned int squaresY)
 {
-	float origSquareXLen = (origxRange.end - origxRange.start) / (float)squaresX;
-	float origSquareYLen = (origyRange.end - origyRange.start) / (float)squaresY;
+	float origSquareXLen = (origxRange.end - origxRange.start) / static_cast<float>(squaresX);
+	float origSquareYLen = (origyRange.end - origyRange.start) / static_cast<float>(squaresY);
 
-	float boardSquareXLen = (boardxRange.end - boardxRange.start) / (float)squaresX;
-	float boardSquareYLen = (boardyRange.end - boardyRange.start) / (float)squaresY;
+	float boardSquareXLen = (boardxRange.end - boardxRange.start) / static_cast<float>(squaresX);
+	float boardSquareYLen = (boardyRange.end - boardyRange.start) / static_cast<float>(squaresY);
 
-	unsigned int xPos = (unsigned int)coord.x % (unsigned int)origSquareXLen;
-	unsigned int yPos = (unsigned int)coord.y % (unsigned int)origSquareYLen;
+	unsigned int xPos = static_cast<unsigned int>(coord.x) % static_cast<unsigned int>(origSquareXLen);
+	unsigned int yPos = static_cast<unsigned int>(coord.y) % static_cast<unsigned int>(origSquareYLen);
 
-	return{ (origSquareXLen - 1.0f - (float)xPos) / origSquareXLen * boardSquareXLen, (origSquareYLen - 1.0f - (float)yPos) / origSquareYLen * boardSquareYLen };
+	return{ (origSquareXLen - 1.0f - static_cast<float>(xPos)) / origSquareXLen * boardSquareXLen, (origSquareYLen - 1.0f - static_cast<float>(yPos)) / origSquareYLen * boardSquareYLen };
 }
 
 std::vector<std::string> split(const std::string &s, char splitchr)
@@ -83,17 +84,17 @@ void getContent(const std::string &s, unsigned int* x, unsigned int* y, std::str
 	*y = std::stoi(ysplit.substr(0, ysplit.length()));
 }
 
-
 void drawInstruction(SceneNode** BoardNode, std::string type, unsigned int x, unsigned int y, struct Range origxRange, struct Range origyRange, struct Range boardxRange, struct Range boardyRange, unsigned int squaresX, unsigned int squaresY, float squareLenX, float squareLenY)
 {
-	unsigned int index = translateCoordinatesToArrayIndex({ (float)x, (float)y }, origxRange, origyRange, squaresX, squaresY);
+	unsigned int index = translateCoordinatesToArrayIndex({ static_cast<float>(x), static_cast<float>(y) }, origxRange, origyRange, squaresX, squaresY);
 
 	struct CoordinateXY centerOfShape;
 	float lenToClosestEdgeX, lenToClosestEdgeY;
 
+	// Decides whether to use the center of the parent square as the center of the figure, or to use the input from the python script as the center.
 	if (USE_INPUT_CENTER_OF_SHAPE)
 	{
-		centerOfShape = translateCoordinatesToCenterOfSquare({ (float)x, (float)y }, origxRange, origyRange, boardxRange, boardyRange, squaresX, squaresY);
+		centerOfShape = translateCoordinatesToCenterOfSquare({ static_cast<float>(x), static_cast<float>(y) }, origxRange, origyRange, boardxRange, boardyRange, squaresX, squaresY);
 		lenToClosestEdgeX = fmin(centerOfShape.x, squareLenX - centerOfShape.x) - 0.1f;
 		lenToClosestEdgeY = fmin(centerOfShape.y, squareLenY - centerOfShape.y) - 0.1f;
 	}
@@ -103,26 +104,25 @@ void drawInstruction(SceneNode** BoardNode, std::string type, unsigned int x, un
 		lenToClosestEdgeX = squareLenX / 2.0f - 0.4f;
 		lenToClosestEdgeY = squareLenY / 2.0f - 0.4f;
 	}
-	
-	//printf("trans: %i, %i, %f, %f\n", x, y, centerOfShape.x, centerOfShape.y);
 
 	SceneNode* snShape;
 
 	if (type == "star")
-		snShape = AddStar(0.1f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 0.4f, 0.4f, 1.0, 1.0f });
+		snShape = AddStar(0.3f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 0.4f, 0.4f, 1.0, 1.0f });
 	else if (type == "square")
-		snShape = AddSquareSkewd(0.1f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 0.3f, 1.0, 0.3f, 1.0f });
+		snShape = AddSquareSkewd(0.3f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 0.3f, 1.0, 0.3f, 1.0f });
 	else if (type == "hexagon1")
-		snShape = AddHexagon(0.1f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 1.0, 1.0, 1.0, 1.0f });
+		snShape = AddHexagon(0.3f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 1.0, 1.0, 1.0, 1.0f });
 	else if (type == "hexagon2")
-		snShape = AddHexagon(0.1f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 0.0, 0.0, 0.0, 1.0f });
+		snShape = AddHexagon(0.3f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 0.0, 0.0, 0.0, 1.0f });
 	else if (type == "pacman")
-		snShape = AddPacman(0.1f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 1.0, 0.4f, 0.4f, 1.0f });
+		snShape = AddPacman(0.3f, centerOfShape, fmin(lenToClosestEdgeX, lenToClosestEdgeY), { 1.0, 0.4f, 0.4f, 1.0f });
 	else if (type == "triangle")
-		snShape = AddTriangle(0.1f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 1.0, 0.0, 1.0, 1.0f });
+		snShape = AddTriangle(0.3f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 1.0, 0.0, 1.0, 1.0f });
 	else if (type == "v")
-		snShape = AddV(0.1f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 1.0, 1.0, 0.0, 1.0f });
-
+		snShape = AddV(0.3f, centerOfShape, lenToClosestEdgeX * 2.0f, lenToClosestEdgeY * 2.0f, { 1.0, 1.0, 0.0, 1.0f });
+	else
+		throw std::invalid_argument("Received unrecognizable input");
 
 	addChild((*BoardNode)->children[index], snShape);
 }
@@ -145,8 +145,8 @@ void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int Squares
 	getContent(initial, &initx, &inity, &initInfo);
 	std::cout << initx << " " << inity << " " << initInfo << std::endl;
 
-	origxRange = { 0.0, (float)initx };
-	origyRange = { 0.0, (float)inity };
+	origxRange = { 0.0, static_cast<float>(initx) };
+	origyRange = { 0.0, static_cast<float>(inity) };
 
 	boardxRange = { -16.0f, 16.0f };
 	boardyRange = { -10.0f, 10.0f };
@@ -154,6 +154,7 @@ void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int Squares
 	struct ColorRGBA firstColor = (initInfo == "red") ? color1 : color2;
 	struct ColorRGBA secondColor = (initInfo == "red") ? color2 : color1;
 
+	// Input gives first color in top left corner, but this program draws from the bottom left corner. This will flip the colors if necessary.
 	if (SquaresY % 2 == 0)
 	{
 		firstColor = ToggleColors(firstColor, color1, color2);
@@ -207,6 +208,7 @@ void ReadDifficult2(SceneNode** BoardNode, unsigned int SquaresX, unsigned int S
 	ReadFile(BoardNode, SquaresX, SquaresY, command.c_str());
 }
 
+// Windows uses "_popen", while Linux uses "popen" (without the "__")
 #ifdef _WIN32
 
 std::string execAndRead(const char* cmd)
@@ -214,9 +216,9 @@ std::string execAndRead(const char* cmd)
 	char buffer[128];
 	std::string result = "";
 	std::shared_ptr<FILE> pipe(_popen(cmd, "r"), _pclose);
-	if (!pipe) throw std::runtime_error("popen() failed!");
+	if (!pipe) throw std::runtime_error("_popen() failed!");
 	while (!feof(pipe.get())) {
-		if (fgets(buffer, 128, pipe.get()) != NULL)
+		if (fgets(buffer, 128, pipe.get()) != nullptr)
 			result += buffer;
 	}
 	return result;
@@ -231,11 +233,10 @@ std::string execAndRead(const char* cmd)
 	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
 	if (!pipe) throw std::runtime_error("popen() failed!");
 	while (!feof(pipe.get())) {
-		if (fgets(buffer, 128, pipe.get()) != NULL)
+		if (fgets(buffer, 128, pipe.get()) != nullptr)
 			result += buffer;
 	}
 	return result;
 }
 
 #endif
-

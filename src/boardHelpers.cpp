@@ -14,11 +14,7 @@ Purpose: Contain helper methods used by many parts of this application.
 #include <Windows.h>
 #endif
 
-ColorRGBA ToggleColors(ColorRGBA now, ColorRGBA alt1, ColorRGBA alt2)
-{
-	return (now.r == alt1.r && now.g == alt1.g && now.b == alt1.b && now.a == alt1.a) ? alt2 : alt1;
-}
-
+// Windows uses GetFullPathNameA, while Linux uses realpath.
 std::string GetAbsolutePath(std::string relativePath)
 {
 #ifdef _WIN32

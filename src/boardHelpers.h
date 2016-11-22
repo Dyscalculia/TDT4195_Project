@@ -39,7 +39,7 @@ struct CoordinateXYZ
 };
 
 /**
-Specifies color values (red, green, blue) and their aplha value.
+Specifies color values (red, green, blue) and their alpha value.
 */
 struct ColorRGBA
 {
@@ -54,7 +54,10 @@ Toggles between two colors.
 @param alt2 Color alternative 2.
 @return The opposite color of the currently assigned color.
 */
-inline struct ColorRGBA ToggleColors(struct ColorRGBA now, struct ColorRGBA alt1, struct ColorRGBA alt2);
+inline struct ColorRGBA ToggleColors(struct ColorRGBA now, struct ColorRGBA alt1, struct ColorRGBA alt2)
+{
+	return (now.r == alt1.r && now.g == alt1.g && now.b == alt1.b && now.a == alt1.a) ? alt2 : alt1;
+}
 
 /**
 Gets the absolute path of a given filename, located in the same folder as the executable file.

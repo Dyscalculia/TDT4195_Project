@@ -8,6 +8,7 @@ Purpose: Contains code to add nodes to the Scene Graph tree.
 
 #include "sceneGraph.hpp"
 #include "drawBoard.h"
+#include "boardHelpers.h"
 
 SceneNode* AddHourglass(float z, float squareLenX, float squareLenY, struct ColorRGBA color)
 {
@@ -16,7 +17,7 @@ SceneNode* AddHourglass(float z, float squareLenX, float squareLenY, struct Colo
 	snSquare->scaleFactor = 1.0;
 	snSquare->rotationSpeedRadians = 0.0;
 	snSquare->indicesCount = 6;
-	snSquare->vertexArrayObjectID = CreateHourglass({ 0.0f, squareLenX }, { 0.0f, squareLenY }, 0.0, -0.1f, color);
+	snSquare->vertexArrayObjectID = CreateHourglass({ 0.0f, squareLenX }, { 0.0f, squareLenY }, 0.0, -0.3f, color);
 
 	return snSquare;
 }
@@ -30,7 +31,7 @@ SceneNode* AddSquare(float z, float squareLenX, float squareLenY, struct ColorRG
 	snSquare->indicesCount = 48;
 	snSquare->liftSpeed = 5.0f;
 	snSquare->animationSpeed = 5.0f;
-	snSquare->vertexArrayObjectID = CreateSquare({ 0.0f, squareLenX }, { 0.0f, squareLenY }, 0.0, -0.1f, color);
+	snSquare->vertexArrayObjectID = CreateSquare({ 0.0f, squareLenX }, { 0.0f, squareLenY }, 0.0, -0.3f, color);
 
 	return snSquare;
 }
@@ -44,7 +45,7 @@ SceneNode* AddSquareSkewd(float z, struct CoordinateXY center, float drawLenX, f
 	snSquare->indicesCount = 48;
 	snSquare->liftSpeed = 5.0f;
 	snSquare->animationSpeed = 5.0f;
-	snSquare->vertexArrayObjectID = CreateSquareSkewd({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) - 1.0f }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
+	snSquare->vertexArrayObjectID = CreateSquareSkewd({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) - 1.0f }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.3f, color);
 
 	return snSquare;
 }
@@ -58,7 +59,7 @@ SceneNode* AddTriangle(float z, struct CoordinateXY center, float drawLenX, floa
 	snTriangle->indicesCount = 24;
 	snTriangle->liftSpeed = 5.0f;
 	snTriangle->animationSpeed = 5.0f;
-	snTriangle->vertexArrayObjectID = CreateTriangle({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
+	snTriangle->vertexArrayObjectID = CreateTriangle({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.3f, color);
 
 	return snTriangle;
 }
@@ -72,7 +73,7 @@ SceneNode* AddPacman(float z, struct CoordinateXY center, float radius, struct C
 	snPacman->indicesCount = 6 * 4 * 100 * 2;
 	snPacman->liftSpeed = 5.0f;
 	snPacman->animationSpeed = 5.0f;
-	snPacman->vertexArrayObjectID = CreatePacman(center, radius, 0.0, -0.1f, 100, color);
+	snPacman->vertexArrayObjectID = CreatePacman(center, radius, 0.0, -0.3f, 100, color);
 
 	return snPacman;
 }
@@ -86,7 +87,7 @@ SceneNode* AddHexagon(float z, struct CoordinateXY center, float radius, struct 
 	snHexagon->indicesCount = 12 * 3 * 2 + 6 * 3 * 6;
 	snHexagon->liftSpeed = 5.0f;
 	snHexagon->animationSpeed = 5.0f;
-	snHexagon->vertexArrayObjectID = CreateHexagon(center, radius, 0.0, -0.1f, color);
+	snHexagon->vertexArrayObjectID = CreateHexagon(center, radius, 0.0, -0.3f, color);
 	return snHexagon;
 }
 
@@ -99,7 +100,7 @@ SceneNode* AddV(float z, struct CoordinateXY center, float drawLenX, float drawL
 	snV->indicesCount = 12 * 2 + 6 * 3 * 4;
 	snV->liftSpeed = 5.0f;
 	snV->animationSpeed = 5.0f;
-	snV->vertexArrayObjectID = CreateV({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.1f, color);
+	snV->vertexArrayObjectID = CreateV({ center.x - (drawLenX / 2.0f), center.x + (drawLenX / 2.0f) }, { center.y - (drawLenY / 2.0f), center.y + (drawLenY / 2.0f) }, 0.0, -0.3f, color);
 
 	return snV;
 }
@@ -113,7 +114,7 @@ SceneNode* AddStar(float z, struct CoordinateXY center, float radius, struct Col
 	snStar->indicesCount = 6 * 5 + 6 * 3 * 5;
 	snStar->liftSpeed = 5.0f;
 	snStar->animationSpeed = 5.0f;
-	snStar->vertexArrayObjectID = CreateStar(center, radius, 0.0, -0.1f, color);
+	snStar->vertexArrayObjectID = CreateStar(center, radius, 0.0, -0.3f, color);
 
 	return snStar;
 }
