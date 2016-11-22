@@ -110,7 +110,7 @@ The static path to the given image
 '''
 def get_image_path(imageName):
     path = os.path.dirname(os.path.abspath(__file__))
-    path += "\\images\\" + imageName
+    path += os.sep + "images" + os.sep + imageName
     return path
 
 #Box filter
