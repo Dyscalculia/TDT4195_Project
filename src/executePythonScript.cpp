@@ -181,6 +181,13 @@ void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int Squares
 	}
 }
 
+void ReadTestFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY)
+{
+	std::string command("python ");
+	command.append(GetAbsolutePath("testing.py"));
+	ReadFile(BoardNode, SquaresX, SquaresY, command.c_str());
+}
+
 void ReadEasy1(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY)
 {
 	std::string command("python ");

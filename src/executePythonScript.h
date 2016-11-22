@@ -17,6 +17,15 @@ Reads the output of the command, and uses the information to create the board.
 void ReadFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY, const char* cmd);
 
 /**
+Reads and processes the output of a test python script.
+
+@param BoardNode The Scene Graph node which the board should be located within.
+@param SquaresX The amount of squares in the x direction which should be drawn in the board.
+@param SquaresY The amount of squares in the y direction which should be drawn in the board.
+*/
+void ReadTestFile(SceneNode** BoardNode, unsigned int SquaresX, unsigned int SquaresY);
+
+/**
 Reads and processes the output of the python script when processing the "Easy 1" board.
 
 @param BoardNode The Scene Graph node which the board should be located within.

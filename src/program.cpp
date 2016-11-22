@@ -72,6 +72,7 @@ void runProgram(GLFWwindow* window)
 	std::cout << "\t[3]: Angled view 2 with rotation" << std::endl;
 	std::cout << "\t[4]: Angled view 3" << std::endl;
 	std::cout << "Load the different boards by pressing:" << std::endl;
+	std::cout << "\t[6]: Test board" << std::endl;
 	std::cout << "\t[7]: Easy 1" << std::endl;
 	std::cout << "\t[8]: Easy 2" << std::endl;
 	std::cout << "\t[9]: Difficult 1" << std::endl;
@@ -270,6 +271,18 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 	{
 		// Move piece right
 		TryToMove(Right);
+	}
+	else if (key == GLFW_KEY_6)
+	{
+		// Load test board
+		BoardNode = nullptr;
+		SelectedNodeGraphIndex = -1;
+		SelectedNode = nullptr;
+		ReadTestFile(&BoardNode, SquaresX, SquaresY);
+		getTimeDeltaSeconds(); // reset counter
+		offset = startOffset;
+		rotateHorizontal = startHorRotation;
+		flyInEnabled = true;
 	}
 	else if (key == GLFW_KEY_7)
 	{
